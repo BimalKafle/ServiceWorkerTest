@@ -1,7 +1,13 @@
+const staticCacheName = "static-site";
+const assets = ["/index.html", "/assets/styles.css", "/assets/script.js"];
 self.addEventListener("install", (event) => {
   event.waitUntil(console.log("Service worker installing"));
+  event.waitUntil(
+    caches.open(staticCacheName).then((caches) => {
+      caches.addAll(assets);
+    })
+  );
 });
-
 self.addEventListener("activate", (event) => {
   console.log("Service Worker activating.");
   event.waitUntil(self.clients.claim());
@@ -15,20 +21,9 @@ self.addEventListener("sync", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Check if the response is valid
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        // Modify the response if needed
-        return response;
-      })
-      .catch((error) => {
-        console.error("Fetch error:", error);
-        // Return a custom error response
-        return new Response("Fetch failed", { status: 500 });
-      })
+    caches.match(event.request).then((cacheRes) => {
+      return cacheRes || fetch(event.request);
+    })
   );
 });
 

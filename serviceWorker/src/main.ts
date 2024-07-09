@@ -3,7 +3,8 @@ import "./style.css";
 import App from "./App.vue";
 
 createApp(App).mount("#app");
-if ("serviceWorker" in navigator && "SyncManager" in window) {
+
+if ("serviceWorker" in navigator) {
   navigator.serviceWorker
     .register("/service-worker.js")
     .then((registration) => {
